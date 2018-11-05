@@ -1,14 +1,16 @@
 import * as Express from 'express'
 import { TransactionController } from './controllers/transaction'
+import { Mock as DB } from './db/transaction';
 
 class Server {
   private readonly app = Express()
-  private readonly transactionController = new TransactionController()
+  private readonly db = new DB()
+  private readonly transactionController = new TransactionController(this.db)
 
   public start() {
     this.register()
     this.app.listen(3000, () => {
-      console.log("Listening...")
+      console.log("ctrl started...")
     })
   }
 

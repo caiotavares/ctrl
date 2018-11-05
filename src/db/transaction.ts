@@ -1,18 +1,13 @@
 import { Transaction } from "../models/internal/transaction";
 import * as UUID from 'uuid/v4'
-import { uuid } from "../types/uuid";
+import { uuid } from "../models/uuid";
 import { IDatabase } from "./interface";
 import { NotFoundError } from "../errors";
 
 class Mock implements IDatabase {
-
-  constructor() {
-    console.log('New DB')
-  }
-
   private db = {}
 
-  public insert = (transaction: Transaction) => {
+  public upsert = (transaction: Transaction) => {
     let id = UUID()
     this.db[id] = transaction
     return id
@@ -24,6 +19,16 @@ class Mock implements IDatabase {
       throw new NotFoundError()
     }
     return transaction
+  }
+
+  public query = (query: any) => {
+    let results = []
+    for (const key in this.db) {
+      if (this.db.hasOwnProperty(key)) {
+        results.push(this.db[key])
+      }
+    }
+    return results
   }
 }
 

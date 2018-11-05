@@ -1,6 +1,7 @@
-import { uuid } from "../types/uuid";
+import { uuid } from "../models/uuid";
 
 export interface IDatabase {
-  insert(document: any)
+  upsert(document: any)
   get(id: uuid)
+  query(query: any)
 }

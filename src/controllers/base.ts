@@ -3,12 +3,11 @@ import * as BodyParser from 'body-parser';
 
 function handle(handleFn: Function, request: Request, response: Response) {
   try {
-    let { result, status } = handleFn(request)
+    let { status, result } = handleFn(request)
     response.status(status)
     response.send(result)
   }
   catch ({ status, error }) {
-    console.log(error)
     response.status(status ? status : 500)
     response.send(error)
   }
@@ -26,4 +25,4 @@ abstract class BaseController {
   protected abstract registerRoutes(router: Router)
 }
 
-export { BaseController, Request, Response, handle }
+export { Router, BaseController, Request, Response, handle }

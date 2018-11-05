@@ -1,39 +1,53 @@
-import { Request, BaseController, handle } from './base';
+import { Router, Request, BaseController, handle } from './base';
 import { TransactionWire } from '../models/wire/transaction';
 import { flow } from '../utils/fp'
 import * as TransactionAdapter from '../adapters/transaction';
 import * as Logic from '../logic/transaction';
-import { Mock as DB } from '../db/transaction';
-import { uuid } from '../types/uuid';
 import { IDatabase } from '../db/interface';
 
-function getTransaction(db: IDatabase) {
+function query(db: IDatabase) {
   return (req: Request) => {
-    let id: uuid = req.params["id"]
-    let result = flow(id,
-      db.get,
-      TransactionAdapter.fromInternal)
-    return { result: result, status: 200 }
+    let query = req.query
+    let results = flow(query,
+      db.query,
+      (results) => results.map(TransactionAdapter.fromInternal))
+    return { status: 200, result: results }
   }
 }
 
-function newTransaction(db: IDatabase) {
+function get(db: IDatabase) {
+  return (req: Request) => {
+    let id = req.params["id"]
+    let result = flow(id,
+      db.get,
+      TransactionAdapter.fromInternal)
+    return { status: 200, result: result }
+  }
+}
+
+function insert(db: IDatabase) {
   return (req: Request) => {
     let transaction: TransactionWire = req.body
     let result = flow(transaction,
       TransactionAdapter.fromWire,
       Logic.validate,
-      db.insert
+      db.upsert
     )
-    return { result: result, status: 201 }
+    return { status: 201, result: result }
   }
 }
 
 export class TransactionController extends BaseController {
-  private db = new DB()
+  private db;
 
-  registerRoutes(router) {
-    router.get('/:id', (req, res) => handle(getTransaction(this.db), req, res))
-    router.put('/', (req, res) => handle(newTransaction(this.db), req, res))
+  constructor(db: IDatabase) {
+    super()
+    this.db = db
+  }
+
+  registerRoutes(router: Router) {
+    router.get('/', (req, res) => handle(query(this.db), req, res))
+    router.put('/', (req, res) => handle(insert(this.db), req, res))
+    router.get('/:id', (req, res) => handle(get(this.db), req, res))
   }
 }

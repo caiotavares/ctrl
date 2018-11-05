@@ -3,11 +3,11 @@ enum TransactionType {
   credit
 }
 
-class Transaction {
-  public type: TransactionType
-  public amount: number
-  public description: string
-  public date: Date
+type Transaction = {
+  type: TransactionType
+  amount: number
+  description: string
+  date: Date
 }
 
 export { TransactionType, Transaction }

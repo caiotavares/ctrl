@@ -1,4 +1,4 @@
-export class TransactionWire {
+export type TransactionWire = {
   type: string
   amount: number
   description: string
